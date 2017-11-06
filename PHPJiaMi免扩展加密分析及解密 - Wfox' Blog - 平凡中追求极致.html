@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)http://sec2hack.com/web/phpjiami-decode.html -->
+<html class="no-js wf-opensans-n3-active wf-opensans-n4-active wf-opensans-n7-active wf-active"><!--<![endif]--><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>PHPJiaMi免扩展加密分析及解密 - Wfox' Blog - 平凡中追求极致</title>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/webfontloader.js.下载"></script><script type="text/javascript">
+    var BASE_SCRIPT_URL = "http://sec2hack.com/usr/themes/Mirages/";
+    var width = window.screen.availWidth;
+    var height = window.screen.availHeight;
+    var injectStyle = function (css) {
+        var link = document.createElement('link');
+        link.setAttribute('rel', 'stylesheet');
+        link.href = css;
+        document.head.appendChild(link);
+    };
+    var getImageAddon = function (width, height) {
+        var addon = "?";
+        var ratio = window.devicePixelRatio || 1;
+        width = width || 0;
+        height = height || 0;
+        if (width == 0 && height == 0) {
+            return "";
+        }
+        var format = "";
+                if (width >= height) {
+            addon += "imageView2/2/w/" + parseInt(width * ratio) + "/q/75" + format;
+        } else {
+            addon += "imageView2/2/h/" + parseInt(height * ratio) + "/q/75" + format;
+        }
+        return addon;
+    };
+    var IS_MOBILE = false,
+        IS_PHONE = false,
+        IS_TABLET = false,
+        IS_HTTPS = false;
+                </script>
+<!-- 使用url函数转换相关路径 -->
+<link rel="stylesheet" href="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/normalize.min.css">
+<link rel="stylesheet" href="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/font-awesome.min.css">
+<link rel="stylesheet" href="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/base.css">
+
+    <link rel="stylesheet" href="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/nprogress.css">
+
+<link rel="stylesheet" href="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/theme.min.css">
+    <link rel="shortcut icon" href="http://sec2hack.com/favicon.ico">
+
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/highlight.min.js.下载" type="text/javascript"></script>
+    <script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/jquery.min.js.下载" type="text/javascript"></script>
+    <script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/nprogress.js.下载" type="text/javascript"></script>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/swift.min.js.下载" type="text/javascript"></script>
+
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+</script>
+<!--[if lt IE 9]>
+<script src="http://cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+<script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<!-- 通过自有函数输出HTML头部信息 -->
+<meta name="description" content="0x00 前言前几天去玩了pwnhub公开赛的题目，源码下载之后发现是PHPJiaMi加密。之前有分析过phpjm加密并写出过解密文件，所以研究下这个PHPJiaMi。PHP免扩展加密的主流加密...">
+<meta name="keywords" content="php解密,phpjiami解密,phpjiami破解,php混淆解密,php免扩展加密">
+<meta name="template" content="Mirages">
+<link rel="pingback" href="http://sec2hack.com/action/xmlrpc">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://sec2hack.com/action/xmlrpc?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://sec2hack.com/action/xmlrpc?wlw">
+<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="http://sec2hack.com/feed/web/phpjiami-decode.html">
+<link rel="alternate" type="application/rdf+xml" title="RSS 1.0" href="http://sec2hack.com/feed/rss/web/phpjiami-decode.html">
+<link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="http://sec2hack.com/feed/atom/web/phpjiami-decode.html">
+<script type="text/javascript">
+(function () {
+    window.TypechoComment = {
+        dom : function (id) {
+            return document.getElementById(id);
+        },
+    
+        create : function (tag, attr) {
+            var el = document.createElement(tag);
+        
+            for (var key in attr) {
+                el.setAttribute(key, attr[key]);
+            }
+        
+            return el;
+        },
+
+        reply : function (cid, coid) {
+            var comment = this.dom(cid), parent = comment.parentNode,
+                response = this.dom('respond-post-59'), input = this.dom('comment-parent'),
+                form = 'form' == response.tagName ? response : response.getElementsByTagName('form')[0],
+                textarea = response.getElementsByTagName('textarea')[0];
+
+            if (null == input) {
+                input = this.create('input', {
+                    'type' : 'hidden',
+                    'name' : 'parent',
+                    'id'   : 'comment-parent'
+                });
+
+                form.appendChild(input);
+            }
+
+            input.setAttribute('value', coid);
+
+            if (null == this.dom('comment-form-place-holder')) {
+                var holder = this.create('div', {
+                    'id' : 'comment-form-place-holder'
+                });
+
+                response.parentNode.insertBefore(holder, response);
+            }
+
+            comment.appendChild(response);
+            this.dom('cancel-comment-reply-link').style.display = '';
+
+            if (null != textarea && 'text' == textarea.name) {
+                textarea.focus();
+            }
+
+            return false;
+        },
+
+        cancelReply : function () {
+            var response = this.dom('respond-post-59'),
+            holder = this.dom('comment-form-place-holder'), input = this.dom('comment-parent');
+
+            if (null != input) {
+                input.parentNode.removeChild(input);
+            }
+
+            if (null == holder) {
+                return true;
+            }
+
+            this.dom('cancel-comment-reply-link').style.display = 'none';
+            holder.parentNode.insertBefore(response, holder);
+            return false;
+        }
+    };
+})();
+</script>
+<script type="text/javascript">
+(function () {
+    var event = document.addEventListener ? {
+        add: 'addEventListener',
+        focus: 'focus',
+        load: 'DOMContentLoaded'
+    } : {
+        add: 'attachEvent',
+        focus: 'onfocus',
+        load: 'onload'
+    };
+
+    document[event.add](event.load, function () {
+        var r = document.getElementById('respond-post-59');
+
+        if (null != r) {
+            var forms = r.getElementsByTagName('form');
+            if (forms.length > 0) {
+                var f = forms[0], textarea = f.getElementsByTagName('textarea')[0], added = false;
+
+                if (null != textarea && 'text' == textarea.name) {
+                    textarea[event.add](event.focus, function () {
+                        if (!added) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = '_';
+                            input.value = (function () {
+    var _8Yzm9 = '432'//'Dx'
++//'9XU'
+'bb6'+'13'//'XQX'
++//'e3p'
+'e'+//'T0Q'
+'e2'+//'V'
+'e'+//'r'
+'42b'+//'w'
+'3b9'+//'H'
+'H'+//'cs'
+'e'+'71f'//'nH'
++//'8X'
+'abd'+//'Ng'
+'4'+'bef'//'Ll'
++//'fU'
+'fU'+''///*'1yt'*/'1yt'
++//'mD'
+'2d'+//'C'
+'C'+'Ka'//'Ka'
++/* 'y'//'y' */''+//'joW'
+'joW'+/* 'INi'//'INi' */''+'8'//'xuz'
+, _BxlVGj = [[18,19],[29,31],[31,32],[31,33],[31,34]];
+    
+    for (var i = 0; i < _BxlVGj.length; i ++) {
+        _8Yzm9 = _8Yzm9.substring(0, _BxlVGj[i][0]) + _8Yzm9.substring(_BxlVGj[i][1]);
+    }
+
+    return _8Yzm9;
+})();
+
+                            f.appendChild(input);
+                            added = true;
+                        }
+                    });
+                }
+            }
+        }
+    });
+})();
+</script>
+    
+<script>
+    //声明_czc对象:
+    var _czc = _czc || [];
+    var _hmt = _hmt || [];
+</script><style type="text/css">
+    /*根据操作系统及浏览器优化font-family*/
+
+</style>
+<style type="text/css">
+    /*根据操作系统及浏览器进行样式修正*/
+
+    /*桌面端*/
+    #index .post .post-title:hover,#archive .post .post-title:hover {
+        color: #1abc9c;
+    }
+    #index .more>a:hover,#archive .more>a:hover {
+        color: #FFF !important;
+        border: 1px solid #1abc9c;
+        background-color: rgba(24,188,156,0.5);
+        width: 250px;
+    }
+    .link-box a:hover {
+        box-shadow: 0 22px 43px rgba(0, 0, 0, 0.15);
+        -webkit-box-shadow: 0 22px 43px rgba(0, 0, 0, 0.15);
+        -webkit-transform: translateY(-4px);
+        transform: translateY(-4px);
+        -moz-transform: none;
+    }
+    #wrap.display-nav #body, #footer.display-nav {
+        opacity: 0.1;
+    }
+
+    /*Not Safari*/
+    /*
+    *webkit浏览器滚动条样式
+    */
+    ::-webkit-scrollbar {
+        height:8px;
+        width:6px;
+    }
+    ::-webkit-scrollbar-button {
+        height:0;
+        width:0;
+    }
+    ::-webkit-scrollbar-button:start:decrement,::-webkit-scrollbar-button:end:increment {
+        display:block;
+    }
+    ::-webkit-scrollbar-button:vertical:start:increment,::-webkit-scrollbar-button:vertical:end:decrement {
+        display:none;
+    }
+    ::-webkit-scrollbar-track:vertical,::-webkit-scrollbar-track:horizontal,::-webkit-scrollbar-thumb:vertical,::-webkit-scrollbar-thumb:horizontal,::-webkit-scrollbar-track:vertical,::-webkit-scrollbar-track:horizontal,::-webkit-scrollbar-thumb:vertical,::-webkit-scrollbar-thumb:horizontal {
+        border-style:solid;
+        border-color:transparent;
+    }
+    ::-webkit-scrollbar-track:vertical::-webkit-scrollbar-track:horizontal{
+        background-clip:padding-box;
+        background-color:#fff;
+    }
+    ::-webkit-scrollbar-thumb {
+        -webkit-box-shadow:inset 1px 1px 0 rgba(0,0,0,.1),inset 0 -1px 0 rgba(0,0,0,.07);
+        background-clip:padding-box;
+        background-color:rgba(0,0,0,.5);
+        min-height:28px;
+        padding-top:100px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        -webkit-box-shadow:inset 1px 1px 1px rgba(0,0,0,.25);
+        background-color:rgba(0,0,0,.4);
+    }
+    ::-webkit-scrollbar-thumb:active {
+        -webkit-box-shadow:inset 1px 1px 3px rgba(0,0,0,.35);
+        background-color:rgba(0,0,0,.5);
+    }
+    ::-webkit-scrollbar-track:vertical,::-webkit-scrollbar-track:horizontal,::-webkit-scrollbar-thumb:vertical,::-webkit-scrollbar-thumb:horizontal {
+        border-width:0;
+    }
+    ::-webkit-scrollbar-track:hover {
+        -webkit-box-shadow:inset 1px 0 0 rgba(0,0,0,.1);
+        background-color:rgba(0,0,0,.05);
+    }
+    ::-webkit-scrollbar-track:active {
+        -webkit-box-shadow:inset 1px 0 0 rgba(0,0,0,.14),inset -1px -1px 0 rgba(0,0,0,.07);
+        background-color:rgba(0,0,0,.05);
+    }
+    /*
+     *  end webkit浏览器滚动条样式
+     */
+    /*Windows*/
+    .post-content p {
+        letter-spacing: 0;
+    }
+    @media screen and (min-width: 1600px){
+        .post-content p {
+            /*font-size: 1.13em;*/
+        }
+        #index .more>a, #archive .more>a {
+            width: 220px;
+        }
+        #index .more>a:hover, #archive .more>a:hover {
+            width: 300px;
+        }
+        .container {
+            max-width: 768px;
+        }
+    }
+    @media screen and (min-width: 1900px){
+        .container {
+            max-width: 852px;
+        }
+    }
+    /*Windows Vista +*/
+    body {
+        font-family: 'Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+    }
+    #post .post-title {
+        font-family: 'Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+    }
+    #nav .menu li a {
+        font-family: 'Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+    }
+    @media screen and (min-device-pixel-ratio: 1.5){
+        body {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        #post .post-title {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        #nav .menu li a {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+    }
+    @media screen and (-webkit-min-device-pixel-ratio: 1.5){
+        body {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        #post .post-title {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        #nav .menu li a {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+    }
+    @media screen and (-o-min-device-pixel-ratio: 1.5/1.5){
+        body {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        #post .post-title {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        #nav .menu li a {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+    }
+    @media screen and (min--moz-device-pixel-ratio: 1.5){
+        body {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        #post .post-title {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        #nav .menu li a {
+            font-family: 'Merriweather','Microsoft Yahei','Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+    }
+    /*.post-content p {*/
+        /*letter-spacing: 1px;*/
+    /*}*/
+    #index .more>a, #archive .more>a {
+        letter-spacing: 0;
+    }
+</style>
+<style type="text/css">
+    /** 页面样式调整 */
+    .post-buttons a {
+        width: calc(100% / 2);
+    }
+
+</style>
+<link rel="stylesheet" href="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/css" media="all"><style type="text/css">
+ 
+</style></head>
+<body class="theme-white color-default">
+<!--[if lt IE 9]>
+<div class="browse-happy" role="dialog">当前网页 <strong>不支持</strong> 你正在使用的浏览器. 为了正常的访问, 请 <a href="http://browsehappy.com/">升级你的浏览器</a>.</div>
+<![endif]-->
+
+<span id="backtop" class="waves-effect waves-button"><i class="fa fa-angle-up"></i></span>
+<div id="wrap">
+    <a id="toggle-nav"><i class="fa fa-bars"></i></a>
+<div id="canvas">
+    <div id="nav">
+        <div class="author">
+            <a href="http://sec2hack.com//about.html">
+                <img src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/0" alt="Avatar" width="100" height="100">
+            </a>
+        </div>
+        <div class="search-box">
+            <form class="form" id="search-form">
+                <input id="search" type="text" name="s" required="" placeholder="Search here..." class="search">
+                <button id="search_btn" type="submit" class="search-btn"><i class="fa fa-search"></i></button>
+            </form>
+        </div>
+        <ul class="menu">
+                        <li><a href="http://sec2hack.com/">Home</a></li>
+            <li>
+                <a class="slide-toggle">Category</a>
+                <div class="category-list hide">
+                    <ul class="list"><li class="category-level-0 category-parent"><a href="http://sec2hack.com/category/web/">web安全</a></li><li class="category-level-0 category-parent"><a href="http://sec2hack.com/category/other/">其他</a></li><li class="category-level-0 category-parent"><a href="http://sec2hack.com/category/ctf/">CTF</a></li><li class="category-level-0 category-parent"><a href="http://sec2hack.com/category/mobile/">移动安全</a></li></ul>                </div>
+            </li>
+                                    <li><a href="http://sec2hack.com/about.html" title="About">About</a></li>
+                    </ul>
+    </div>
+</div>
+    
+    <div id="body">
+        <style type="text/css">
+    /** 页面样式调整 */
+    div#comments{margin-top: 0;}
+    #footer{
+        padding: 20px 0;
+    }
+    
+</style>
+<style type="text/css">
+ 
+</style>        <script type="text/javascript">
+            var bg = "";
+            var getBgHeight = function(windowHeight){
+                windowHeight = windowHeight || 560;
+                if (windowHeight > window.screen.availHeight) {
+                    windowHeight = window.screen.availHeight;
+                }
+                                var bgHeightP = "50";
+                                bgHeightP = bgHeightP.trim();
+                bgHeightP = parseFloat(bgHeightP);
+                bgHeightP =  windowHeight * bgHeightP / 100;
+                return bgHeightP;
+            };
+                    </script>
+                                
+                <div class="container">
+            <div class="row">
+
+    
+    
+<div id="post" role="main">
+    <article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+                <h2 class="post-title" itemprop="name headline">PHPJiaMi 免扩展加密分析及解密</h2>
+        <ul class="post-meta">
+            <li itemprop="author" itemscope="" itemtype="http://schema.org/Person">作者: <a itemprop="name" href="http://sec2hack.com/author/1/" rel="author">Wfox</a></li>
+            <li>时间: <time datetime="2017-09-22T01:54:00+00:00" itemprop="datePublished">September 22, 2017</time></li>
+                        <li>分类: <a href="http://sec2hack.com/category/web/">web 安全</a></li>
+                    </ul>
+                <div class="post-content" itemprop="articleBody">
+            <h2>0x00 前言</h2>
+<p>前几天去玩了 pwnhub 公开赛的题目，源码下载之后发现是 PHPJiaMi 加密。之前有分析过 phpjm 加密并写出过解密文件，所以研究下这个 PHPJiaMi。<br>
+PHP 免扩展加密的主流加密方法采用了 ascii 码 129-255 的乱码来实现变量名、函数名混淆，编辑器打开后就是一堆乱码，造成不可读。</p>
+<blockquote>
+<p>加密流程：源码 -&gt; 加密处理（压缩，替换，BASE64，转义）-&gt; 安全处理（验证文件 MD5 值，限制 IP、限域名、限时间、防破解、防命令行调试）-&gt; 加密程序成品，再简单的说：源码 + 加密外壳 == 加密程序  (<a href="http://www.liqingbo.cn/blog-1325.html" target="_blank">该段出处</a>)</p>
+</blockquote>
+<h2>0x01 解密准备</h2>
+<p>这里做演示，我写了 phpinfo() 然后去 <a href="http://www.phpjiami.com/" target="_blank">http://www.phpjiami.com/</a> 生成加密文件，打开之后，果然都是一片乱码。<br>
+使用代码修复工具 <a href="http://zhaoyuanma.com/phpcodefix.html" target="_blank">http://zhaoyuanma.com/phpcodefix.html</a> 将 ascii 不可见字符的变量修复成正常的变量名，再 PHP 代码美化，方便下一步分析。</p>
+<h2>0x02 函数分析</h2>
+<p>代码内有三个函数，由于每次加密这三个函数的顺序都不一样，这个以传参方式区分这三个函数<br>
+fun1 = ($var1, $var2 = '') = <strong>核心函数，将乱码转成正常字符串</strong><br>
+fun2 = (&amp;$var1, $var2) = <strong>校验 IP、域名，防止被破解。最后一句是解密整个 php 文件</strong><br>
+fun3 = ($var1) = <strong>将需要用到的函数赋值给 N 个全局变量</strong></p>
+<!--more-->
+<p>先从 fun1 开始逆起，在编辑器中双击变量名，该变量高亮之后，可以看到它怎么变化，在哪里被使用。<br>
+一句句语句逆下去，发现有语法错误，其实是代码修复后的 bug，用 winhex 打开定位到这句代码，发现是三元运算符</p>
+<pre><code class="hljs perl">$var2 = !$var2 ? <span class="hljs-keyword">ord</span>(<span class="hljs-string">'乱码'</span>) : $var2;
+</code></pre>
+<p>接下来是一句很奇怪很无用的代码，再下一句是 for 循环，我猜测是给 $i 赋值</p>
+<pre><code class="hljs bash"><span class="hljs-keyword">for</span>(<span class="hljs-variable">$i</span>=0; <span class="hljs-variable">$i</span>&lt;strlen(<span class="hljs-variable">$var1</span>); <span class="hljs-variable">$i</span>++)
+</code></pre>
+<p>下个 for 循环里又是一个三元运算符，手动修复后，基本 fun1 的代码就出来。<br>
+接下来就是运行 fun1 函数，但是碰到个坑点，fun1 有很多处用到乱码做运算，而乱码不能直接拷到编辑器中。<br>
+用 winhex 将 16 进制的乱码字符复制出来，在运算的时候 pack("H*","乱码") 将它还原回乱码即可。</p>
+<pre><code class="hljs perl">function fun1($var1, $var2 = <span class="hljs-string">''</span>)
+{
+    $md5 = md5(<span class="hljs-keyword">pack</span>(<span class="hljs-string">"H*"</span>,<span class="hljs-string">'FBE3FCFAF9E0'</span>));<span class="hljs-regexp">//</span>乱码随机字符串<span class="hljs-number">1</span>
+    $var2 = !$var2?<span class="hljs-keyword">ord</span>(<span class="hljs-keyword">pack</span>(<span class="hljs-string">"H*"</span>,<span class="hljs-string">'8C'</span>)):$var2;<span class="hljs-regexp">//</span>乱码随机字符串<span class="hljs-number">2</span>
+    
+    $str = <span class="hljs-string">''</span>;
+    <span class="hljs-keyword">for</span>($i=<span class="hljs-number">0</span>; $i&lt;strlen($var1); $i++)
+    {
+        $str .= <span class="hljs-keyword">ord</span>($var1{$i}) &lt; <span class="hljs-keyword">ord</span>(<span class="hljs-keyword">pack</span>(<span class="hljs-string">"H*"</span>,<span class="hljs-string">'F5'</span>)) ? ((<span class="hljs-keyword">ord</span>($var1{$i}) &gt; $var2 &amp;&amp; <span class="hljs-keyword">ord</span>($var1{$i}) &lt; <span class="hljs-keyword">ord</span>(<span class="hljs-keyword">pack</span>(<span class="hljs-string">"H*"</span>,<span class="hljs-string">'F5'</span>))) ? <span class="hljs-keyword">chr</span>(<span class="hljs-keyword">ord</span>($var1{$i}) / <span class="hljs-number">2</span>) : $var1{$i}) : <span class="hljs-string">''</span>;
+    }
+    $de1 =  base64_decode($str);
+    $len = $len2 = strlen($md5);
+    $str2 = <span class="hljs-string">''</span>;
+    <span class="hljs-keyword">for</span>($i=<span class="hljs-number">0</span>; $i&lt;strlen($de1); $i++)
+    {
+        $len = $len ? $len : $len2;
+        $len--;
+        $str2 .= $de1[$i] ^ $md5[$len];
+    }
+    <span class="hljs-keyword">return</span> $str2;
+}
+</code></pre>
+<p>接着开始还原 fun2 代码，fun2 中前面都调用了 fun1 解密字符串，解密可得到 fun2 后面需要用到的函数名。有了 fun1，后面解密都非常顺利</p>
+<pre><code class="hljs php"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fun2</span><span class="hljs-params">(&amp;$var1, $var2)</span>
+</span>{
+    $de = str_rot13(strrev(gzuncompress(stripslashes(fun1(pack(<span class="hljs-string">'H*'</span>,<span class="hljs-string">'8ECA349A37A639E43946ACE4B242F4EED8E8A0CC4444E639E894C2C69CB0384134EEEEC6CA3233B433ECD89CC6D435A437CE98B0D2A092909E96D030EE8EA2A4D044CADCA2DC32CCE02BAADCEEEA4537D8ACB43298F238E0428EC29646A0CAA2EECA43D2B2C442F4C4358E46429434AE44B0DACAF0AE4190C845EE32AE34C82BC49494E22BCAA49CD6D2E8CA94D2D4A6329C929A3596F2CC36CCD6CCAAF0C646D0A69EC8F02FA2A03938D234C2D2E0DCCCCAC4A8A631AC4238C4A490ECD4CCF0DAF4CAB2'</span>))))));
+    $exp = explode(<span class="hljs-string">','</span>, $de);
+    $var1 = $exp[$var2];
+}
+</code></pre>
+<p>$de 解出来是一堆函数名，然后赋值给全局变量，后面解密都需要用到。fun2 解出来是固定的字符串</p>
+<blockquote>
+<p>,chr,addslashes,rand,gzuncompress,assert_options,assert,file_exists,file_get_contents,substr,unpack,constant,strpos,create_function,str_rot13,md5,set_include_path,dirname,preg_replace,base64_encode,base64_decode,</p>
+</blockquote>
+<p>接着暂且先不看 fun3，回到主代码中。<br>
+<img src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/2265835617.png" alt="QQ截图20170922040008.png" data-action="zoom"></p>
+<p>这里创建了一堆全局变量，通过 fun2 赋值，每个变量都代表一个函数名<br>
+<img src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/1848056089.png" alt="QQ截图20170922040511.png" data-action="zoom"></p>
+<p>接着还原 fun3 函数，步骤一样。</p>
+<pre><code class="hljs php"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fun3</span><span class="hljs-params">()</span>
+</span>{
+    php_sapi_name() == <span class="hljs-string">'cli'</span> ? <span class="hljs-keyword">die</span>():<span class="hljs-string">''</span>;
+    $file = file_get_contents(<span class="hljs-keyword">__FILE__</span>);
+    <span class="hljs-keyword">if</span>(!<span class="hljs-keyword">isset</span>($_SERVER[<span class="hljs-string">'HTTP_HOST'</span>]) &amp;&amp; !<span class="hljs-keyword">isset</span>($_SERVER[<span class="hljs-string">'SERVER_ADDR'</span>]) &amp;&amp; !<span class="hljs-keyword">isset</span>($_SERVER[<span class="hljs-string">'REMOTE_ADDR'</span>]))
+    {
+        <span class="hljs-keyword">die</span>();
+    }
+    $time = microtime(<span class="hljs-keyword">true</span>) * <span class="hljs-number">1000</span>;
+    <span class="hljs-keyword">if</span>(microtime(<span class="hljs-keyword">true</span>) * <span class="hljs-number">1000</span> - $time &gt; <span class="hljs-number">100</span>)
+    {
+        <span class="hljs-keyword">die</span>();
+    }
+    <span class="hljs-keyword">if</span>(strpos(<span class="hljs-keyword">__FILE__</span>, gtmclaei) !== <span class="hljs-number">0</span>){$exitfunc();}
+    !strpos(de1(substr($file, de1(<span class="hljs-string">'A8414145'</span>), de1(<span class="hljs-string">'A841AA3D'</span>))), md5(substr($file, de1(<span class="hljs-string">'AAA23D3D'</span>), de1(<span class="hljs-string">'A8414190'</span>)))) ? unkonw1() : unkonw2();
+    $loc1 = fun1(<span class="hljs-string">'A841AA45ACEE3D3D'</span>);
+    $loc1 = fun1(<span class="hljs-string">'A8414190'</span>);
+    $de = str_rot13(gzuncompress(fun1(substr($file, $loc1, $loc2))));<span class="hljs-comment">//核心解密</span>
+    <span class="hljs-keyword">return</span> $de;
+}
+</code></pre>
+<p>后面的代码已经不用再看了，fun2 解出来的就是解密后的原代码。<br>
+<img src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/3757017134.png" alt="QQ截图20170922131714.png" data-action="zoom"></p>
+<p>最后附上解密脚本 <a href="http://sec2hack.com/phpjiami.zip" target="_blank">http://sec2hack.com/phpjiami.zip</a></p>
+        </div>
+		<div class="tags">
+			<div class="dkeywords">
+			   <div itemprop="keywords" class="keywords">标签: <a href="http://sec2hack.com/tag/php%E8%A7%A3%E5%AF%86/">php 解密</a>, <a href="http://sec2hack.com/tag/phpjiami%E8%A7%A3%E5%AF%86/">phpjiami 解密</a>, <a href="http://sec2hack.com/tag/phpjiami%E7%A0%B4%E8%A7%A3/">phpjiami 破解</a>, <a href="http://sec2hack.com/tag/php%E6%B7%B7%E6%B7%86%E8%A7%A3%E5%AF%86/">php 混淆解密</a>, <a href="http://sec2hack.com/tag/php%E5%85%8D%E6%89%A9%E5%B1%95%E5%8A%A0%E5%AF%86/">php 免扩展加密</a></div>
+			</div>
+		</div>
+                <div class="post-buttons">
+            <a id="toggle-archives" href="http://sec2hack.com/archives.html">返回文章列表</a>
+                        <a id="toggle-post-qr-code">文章二维码</a>
+                                </div>
+            </article>
+</div><!-- end #post-->
+
+</div><!-- end .row -->
+</div>
+<div id="qr-box">
+    <div class="post-qr-code-box">
+        <img src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/barCode" width="250" height="250" alt="本页链接的二维码">
+    </div>
+    <div class="reward-qr-code-box">
+        <img src="http://sec2hack.com/web/phpjiami-decode.html" height="250" alt="打赏二维码">
+    </div>
+</div>
+<div id="body-bottom">
+<div class="container">
+            <div class="post-near">
+            <nav>
+                <span class="prev"><span class="prev-t">上一篇: </span><a href="http://sec2hack.com/web/typecho-fix.html" title="Typecho漏洞复现及修复">Typecho 漏洞复现及修复</a></span>
+                <span class="next"><span class="prev-t">下一篇: </span><a href="http://sec2hack.com/ctf/baidu-writeup-web.html" title="第一届百度杯总决赛WriteUp for Web">第一届百度杯总决赛 WriteUp for Web</a></span>
+            </nav>
+        </div>
+                        <div id="comments">
+                                        <span class="widget-title text-center">评论列表</span>
+                <ol class="comment-list"><li itemscope="" itemtype="http://schema.org/UserComments" id="pingback-25" class="comment-body comment-parent comment-odd">
+    <div class="comment-author" itemprop="creator" itemscope="" itemtype="http://schema.org/Person">
+        <span itemprop="image"></span>
+        <cite class="fn" itemprop="name"><a href="http://hack.hk.cn/2017/09/23/phpjiami-%e6%95%b0%e7%a7%8d%e8%a7%a3%e5%af%86%e6%96%b9%e6%b3%95/" rel="external nofollow">phpjiami 数种解密方法 - 莹莹之色</a></cite>
+    </div>
+    <div class="comment-meta">
+        <a href="http://sec2hack.com/web/phpjiami-decode.html/comment-page-1#pingback-25"><time itemprop="commentTime" datetime="2017-09-24T17:37:25+00:00">September 24th, 2017 at 05:37 pm</time></a>
+            </div>
+    <div class="comment-content" itemprop="commentText">
+    <p>[...] 这种方法我最佩服了，作者甚至给出了解密脚本，文章如下： http://sec2hack.com/web/phpjiami-decode.html 。[...]</p>    </div>
+    <div class="comment-reply">
+        <a href="http://sec2hack.com/web/phpjiami-decode.html/comment-page-1?replyTo=25#respond-post-59" rel="nofollow" onclick="return TypechoComment.reply(&#39;pingback-25&#39;, 25);">回复</a>    </div>
+    </li>
+<li itemscope="" itemtype="http://schema.org/UserComments" id="pingback-26" class="comment-body comment-parent comment-even">
+    <div class="comment-author" itemprop="creator" itemscope="" itemtype="http://schema.org/Person">
+        <span itemprop="image"></span>
+        <cite class="fn" itemprop="name"><a href="http://www.shellsec.com/news/47511.html" rel="external nofollow">phpjiami 数种解密方法 | 神刀安全网</a></cite>
+    </div>
+    <div class="comment-meta">
+        <a href="http://sec2hack.com/web/phpjiami-decode.html/comment-page-1#pingback-26"><time itemprop="commentTime" datetime="2017-09-24T21:06:54+00:00">September 24th, 2017 at 09:06 pm</time></a>
+            </div>
+    <div class="comment-content" itemprop="commentText">
+    <p>[...] 这种方法我最佩服了，作者甚至给出了解密脚本，文章如下： http://sec2hack.com/web/phpjiami-decode.html 。[...]</p>    </div>
+    <div class="comment-reply">
+        <a href="http://sec2hack.com/web/phpjiami-decode.html/comment-page-1?replyTo=26#respond-post-59" rel="nofollow" onclick="return TypechoComment.reply(&#39;pingback-26&#39;, 26);">回复</a>    </div>
+    </li>
+</ol>                                                        <div id="respond-post-59" class="respond">
+                    <div class="cancel-comment-reply">
+                        <a id="cancel-comment-reply-link" href="http://sec2hack.com/web/phpjiami-decode.html#respond-post-59" rel="nofollow" style="display:none" onclick="return TypechoComment.cancelReply();">取消回复</a>                    </div>
+                    <span id="response" class="widget-title text-left">添加新评论</span>
+                    <form method="post" action="http://sec2hack.com/web/phpjiami-decode.html/comment" id="comment-form">
+                                                    <input type="text" name="author" id="author" placeholder="称呼" value="">
+                            <input type="email" name="mail" id="mail" placeholder="电子邮件" value="">
+                            <input type="text" name="url" id="url" placeholder="网站" value="">
+                                                <p>
+                            <textarea rows="5" name="text" id="textarea" placeholder="在这里输入你的评论..." style="resize:none;"></textarea>
+                                                    </p>
+                        <p><input type="submit" value="提交评论" class="button" id="submit"></p>
+                    </form>
+                </div>
+                    </div>
+    
+
+
+</div>
+</div>
+</div><!-- end #body -->
+</div><!-- end #wrap -->
+<footer id="footer" role="contentinfo">
+    <div class="container">
+        <p>Copyright © 2017 <a href="http://sec2hack.com/">Wfox' Blog - 平凡中追求极致</a> • All Rights Reserved.</p>
+        <p>Powered By <a href="http://www.typecho.org/">Typecho</a> • Theme <a no-pjax="" href="https://hran.me/mirages.html?copyright&amp;v=141b">Mirages</a></p>
+        <p><a target="_blank" href="http://www.miibeian.gov.cn/">粤ICP备16071994号</a></p>
+    </div>
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1260753068'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1260753068' type='text/javascript'%3E%3C/script%3E"));</script><span id="cnzz_stat_icon_1260753068"><a href="http://www.cnzz.com/stat/website.php?web_id=1260753068" target="_blank" title="站长统计">站长统计</a></span><script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/z_stat.php" type="text/javascript"></script><script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/core.php" charset="utf-8" type="text/javascript"></script>
+</footer><!-- end #footer -->
+<div id="loader-wrapper">
+    <div id="loader"></div>
+    <div class="loader-section section-left"></div>
+    <div class="loader-section section-right"></div>
+</div>
+
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/jquery.pjax.min.js.下载" type="text/javascript"></script>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/waves.min.js.下载"></script><script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/projectpoi.min.js.下载"></script>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/bootstrap.min.js.下载" type="text/javascript"></script>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/headroom.min.js.下载" type="text/javascript"></script>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/jquery.githubRepoWidget.min.js.下载" type="text/javascript"></script>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/pangu.min.js.下载" type="text/javascript"></script>
+
+<script type="text/javascript">
+    pangu.spacingElementById('body');
+    Waves.displayEffect();
+</script>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/zoom.min.js.下载" type="text/javascript"></script><script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/projectpoi.min.js.下载"></script>
+<script src="./PHPJiaMi免扩展加密分析及解密 - Wfox&#39; Blog - 平凡中追求极致_files/skin.js.下载" type="text/javascript"></script>
+
+
+
+<script type="text/javascript">
+    (function ($) {
+        var getPostImageAddon = function(){
+            var addon = "?";
+            var ratio = window.devicePixelRatio || 1;
+            width = window.innerWidth || 0;
+            height = window.innerHeight || 0;
+            if(width == 0 || height == 0){
+                return "";
+            }
+            var format = "";
+                        if(width > height){
+                addon += "imageView2/2/h/"+ parseInt(height * ratio) + "/q/75" + format;
+            }else{
+                addon += "imageView2/2/w/"+ parseInt(width * ratio) + "/q/75" + format;
+            }
+            return addon;
+        };
+        var setupImages = function () {
+            var addon = getPostImageAddon();
+            $("article img:not(code img, pre img)").each(function() {
+                var src = $(this).attr('data-src');
+                if (src != null && src != undefined && src != "") {
+                    $(this).attr('src', src + addon);
+                    $(this).removeAttr('data-src');
+                }
+            });
+        };
+                String.prototype.startWith = function(str){
+            if (str == null || str == "" || this.length == 0 || str.length > this.length) {
+                return false;
+            }
+            return this.substr(0, str.length) == str;
+        };
+        var pajx_loadDuoshuo = function(){
+            DUOSHUO.EmbedThread($('.ds-thread'));
+            DUOSHUO.ThreadCount($('.ds-thread-count'));
+        };
+        var pjax_loadDisqus = function () {
+            if($('#disqus_thread').length) {
+                if(window.DISQUS) {
+                    DISQUS.reset({
+                        reload: true
+                    });
+                } else {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + '' + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                }
+            }
+        };
+        pjax_loadDisqus();
+        var body_am = function(id) {
+            id = isNaN(id) ? $('#' + id).offset().top : id;
+            $("body,html").animate({
+                scrollTop: id
+            }, 0);
+            return false;
+        };
+        var to_am = function() {
+            var anchor = location.hash.indexOf('#'); // 用indexOf检查location.href中是否含有'#'号，如果没有则返回值为-1
+            if (anchor < 0) {
+                return;
+            }
+            anchor = window.location.hash.substring(anchor + 1);
+            body_am(anchor);
+        };
+        var setupContents = function () {
+            $("article img:not(article .link-box img, img[no-zoom])").each(function() {
+                $(this).attr('data-action', 'zoom');
+                if($(this).next().is('br')){
+                    $(this).next().remove();
+                }
+            });
+            $(".post-content a:not(code a, pre a), #content a:not(code a, pre a)").each(function() {
+                var href = $(this).attr('href');
+                if (href.startWith("http")) {
+                    $(this).attr('target', "_blank");
+                }
+            });
+            $(".post-content p.more a").each(function() {
+                $(this).removeAttr("target")
+            });
+            $( ".post-content table" ).wrap( "<div class='table-responsive'></div>" );
+        };
+        var reHighlightCodeBlock = function () {
+            $('pre code').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+        };
+        var resetStatus = function () {
+            $('#wrap').removeClass('display-nav');
+            $('#footer').removeClass('display-nav');
+            $('#body').off('click');
+            $('body').removeClass('show-reward-qr-box').removeClass('show-post-qr-box');
+        };
+        var rebindEvents = function () {
+            $('#toggle-post-qr-code').off('click').on('click', function (e) {
+                var body = $('body');
+                if (!body.hasClass('show-post-qr-box')) {
+                    _hmt.push(['_trackEvent', '按钮', '点击', '二维码']);
+                    _czc.push(['_trackEvent', '按钮', '点击', '二维码']);
+                }
+                body.removeClass('show-reward-qr-box').toggleClass('show-post-qr-box');
+            });
+            $('#toggle-reward-qr-code').off('click').on('click', function (e) {
+                var body = $('body');
+                if (!body.hasClass('show-reward-qr-box')) {
+                    _hmt.push(['_trackEvent', '按钮', '点击', '打赏']);
+                    _czc.push(['_trackEvent', '按钮', '点击', '打赏']);
+                }
+                body.removeClass('show-post-qr-box').toggleClass('show-reward-qr-box');
+
+            });
+        };
+        setupContents();
+        rebindEvents();
+                $('body').pjax('a[href^="http://sec2hack.com/"]:not(a[target="_blank"], a[no-pjax])', {
+                container: '#body',
+                fragment: '#body',
+                timeout: 8000
+            }
+        ).on('pjax:click', function() {
+            $('body').attr('data-prev-href', document.location.pathname + document.location.search + document.location.hash);
+        }).on('pjax:send', function() {
+            $('#loader-wrapper').show();
+            resetStatus();
+        }).on('pjax:complete', function() {
+            $('#loader-wrapper').hide();
+            var refer = $('body').attr('data-prev-href');
+            var currentHref = document.location.pathname + document.location.search + document.location.hash;
+            _czc.push(﻿['_trackPageview', currentHref, refer]);
+            _hmt.push(['_trackPageview', currentHref]);
+            pangu.spacingElementById('body');
+                        setupImages();
+            setupContents();
+            reHighlightCodeBlock();
+            rebindEvents();
+            to_am();
+                    });
+                $(document).ready(function () {
+            $('.n-progress').remove();
+        });
+    })(jQuery);
+</script>
+<script>
+    var fontname;
+    if (window.devicePixelRatio >= 1.5) {
+        fontname = "Merriweather:200,300,400:latin,latin-ext";
+    } else {
+        fontname = "Open Sans:300,400,700:latin,latin-ext";
+    }
+    WebFontConfig = {
+        google: {
+            families: [fontname]
+        },
+        timeout: 3000
+    };
+
+    (function(d) {
+        var wf = d.createElement('script'), s = d.scripts[0];
+        wf.src = 'http://cdn.bootcss.com/webfont/1.6.24/webfontloader.js';
+        s.parentNode.insertBefore(wf, s);
+    })(document);
+</script>
+
+
+</body></html>
